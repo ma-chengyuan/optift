@@ -48,7 +48,7 @@ jobs:
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
       - name: Build 
         run: |
-          cmake --preset vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows-static-release -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          cmake --preset vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows-static-release -DCMAKE_BUILD_TYPE=RelWithDebInfo -G "Visual Studio 17 2022" -A x64
           cmake --build build
         env:
           VCPKG_ROOT: ${{ env.VCPKG_INSTALLATION_ROOT }}
@@ -57,4 +57,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: optift-windows
-          path: build/optift.exe
+          path: build
