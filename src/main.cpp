@@ -397,30 +397,15 @@ CostModel build_cost_model(hb_face_t *face, std::span<const UChar32> codepoints,
         option::FontStyles{std::vector<FontStyle>{FontStyle::bold}},
     };
 
-    // tbb::parallel_for_each(
-    //     samples.begin(), samples.end(), [&](std::vector<UChar32> &sample) {
-    //         const std::vector<uint8_t> compressed = subset_font(face,
-    //         sample);
-    //         // ranges::sort(sample);
-    //         // const size_t unicode_range_cost =
-    //         //     compute_unicode_range(sample).size();
-    //         {
-    //             std::lock_guard lock{results_mutex};
-    //             raw_data.emplace_back(sample.size(), compressed.size());
-    //             bar.tick();
-    //         }
-    //     });
-    for (const auto &sample : samples) {
-        const std::vector<uint8_t> compressed = subset_font(face, sample);
-        // ranges::sort(sample);
-        // const size_t unicode_range_cost =
-        //     compute_unicode_range(sample).size();
-        {
-            std::lock_guard lock{results_mutex};
-            raw_data.emplace_back(sample.size(), compressed.size());
-            bar.tick();
-        }
-    }
+    tbb::parallel_for_each(
+        samples.begin(), samples.end(), [&](std::vector<UChar32> &sample) {
+            const std::vector<uint8_t> compressed = subset_font(face, sample);
+            {
+                std::lock_guard lock{results_mutex};
+                raw_data.emplace_back(sample.size(), compressed.size());
+                bar.tick();
+            }
+        });
 
     bar.mark_as_completed();
 
