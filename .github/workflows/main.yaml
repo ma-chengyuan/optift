@@ -36,6 +36,9 @@ jobs:
   #         path: build/optift
   build-windows:
     runs-on: windows-latest
+    env:
+      VCPKG_ROOT: C:/vcpkg
+      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,14 +51,11 @@ jobs:
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
       - name: Install pkgconf via vcpkg
         run: |
-          C:/vcpkg/vcpkg.exe install pkgconf:x64-windows-static-release
+          C:/vcpkg/vcpkg.exe add port pkgconf
       - name: Build
         run: |
           cmake --preset vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows-static-release -DCMAKE_BUILD_TYPE=RelWithDebInfo -G "Visual Studio 17 2022" -A x64
           cmake --build build
-        env:
-          VCPKG_ROOT: C:/vcpkg
-          VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
       - name: Save binary
         uses: actions/upload-artifact@v4
         with:
