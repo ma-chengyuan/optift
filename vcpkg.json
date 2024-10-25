@@ -4,7 +4,6 @@
     "harfbuzz",
     "icu",
     "indicators",
-    "matplotplusplus",
     "nlohmann-json",
     "range-v3",
     "spdlog",
