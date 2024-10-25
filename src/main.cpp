@@ -620,7 +620,8 @@ void save_and_evaluate_solution(const Input &input,
                                 const PartitionSoln &partition_soln,
                                 std::span<const UChar32> item_to_codepoint,
                                 const argparse::ArgumentParser &program) {
-    const std::string output_path = program.get<std::string>("--output");
+    const std::filesystem::path output_path{
+        program.get<std::string>("--output")};
 
     tbb::task_group g;
 
@@ -645,8 +646,7 @@ void save_and_evaluate_solution(const Input &input,
     g.wait();
 
     for (const auto &[filename, subsetted_font] : soln.subsetted_fonts) {
-        const std::string font_output_path =
-            fmt::format("{}/{}", output_path, filename);
+        const auto font_output_path = output_path / filename;
         std::ofstream f{font_output_path, std::ios::binary};
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
         f.write(reinterpret_cast<const char *>(subsetted_font.data()),
@@ -654,8 +654,7 @@ void save_and_evaluate_solution(const Input &input,
                 subsetted_font.size());
     }
     {
-        const std::string css_output_path =
-            fmt::format("{}/font.css", output_path);
+        const auto css_output_path = output_path / "font.css";
         std::ofstream f{css_output_path, std::ios::app};
         f << soln.css;
     }
