@@ -24,7 +24,7 @@ jobs:
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
       - name: Build 
         run: |
-          cmake --preset vcpkg -DVCPKG_TARGET_TRIPLET=x64-linux-release
+          cmake --preset vcpkg -DVCPKG_TARGET_TRIPLET=x64-linux-release -DCMAKE_BUILD_TYPE=RelWithDebInfo
           cmake --build build
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
