@@ -54,7 +54,7 @@ jobs:
           C:/vcpkg/vcpkg.exe add port pkgconf
       - name: Build
         run: |
-          cmake --preset vcpkg -DCMAKE_BUILD_TYPE=Release -G "Ninja"
+          cmake --preset vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows-static -DCMAKE_BUILD_TYPE=Release -G "Ninja"
           cmake --build build
       - name: Save binary
         uses: actions/upload-artifact@v4
