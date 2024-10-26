@@ -565,7 +565,8 @@ FontPartitionSoln FontPartitionSoln::from_partition_soln(
 
     // Use stem of font path as output base
     // Just a hack for now, should be configurable
-    const std::string output_base = std::filesystem::path{font_path}.stem();
+    const std::string output_base =
+        std::filesystem::path{font_path}.stem().string();
 
     // Generate font subsets in parallel
     std::vector<std::pair<std::string, std::vector<uint8_t>>> subsetted_fonts(
@@ -758,7 +759,8 @@ FontPartitionSoln::from_google_fonts(const Input &input,
 
 #include "../eval/google_fonts_baseline.inc"
 
-    const std::string output_base = std::filesystem::path{font_path}.stem();
+    const std::string output_base =
+        std::filesystem::path{font_path}.stem().string();
     const auto all_codepoints = input.get_all_codepoints_sorted(font_path);
 
     std::vector<std::vector<UChar32>> partitions(
