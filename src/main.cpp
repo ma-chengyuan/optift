@@ -25,7 +25,7 @@
 #include <unicode/umachine.h>
 #include <unicode/unistr.h>
 #include <woff2/encode.h>
-#include <zlib.h>
+#include <zlib-ng.h>
 
 #include <range/v3/algorithm/is_sorted.hpp>
 #include <range/v3/algorithm/sort.hpp>
@@ -491,13 +491,14 @@ template <typename T> std::string pretty_print_size(T size_) {
  * \return The compressed data
  */
 std::vector<uint8_t> gzip_string(const std::string &data) {
-    z_stream stream;
+    zng_stream stream;
     stream.zalloc = Z_NULL;
     stream.zfree = Z_NULL;
     stream.opaque = Z_NULL;
 
-    if (deflateInit2(&stream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15 + 16, 8,
-                     Z_DEFAULT_STRATEGY) != Z_OK) {
+    // NOLINTNEXTLINE(*-magic-numbers)
+    if (zng_deflateInit2(&stream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15 + 16, 8,
+                         Z_DEFAULT_STRATEGY) != Z_OK) {
         throw std::runtime_error(
             "Failed to initialize zlib for gzip compression");
     }
@@ -516,9 +517,9 @@ std::vector<uint8_t> gzip_string(const std::string &data) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-*-cast)
         stream.next_out = reinterpret_cast<Bytef *>(buffer.data());
 
-        int ret = deflate(&stream, Z_FINISH);
+        int ret = zng_deflate(&stream, Z_FINISH);
         if (ret != Z_OK && ret != Z_STREAM_END) {
-            deflateEnd(&stream);
+            zng_deflateEnd(&stream);
             throw std::runtime_error("Error during gzip compression");
         }
         const auto compressed_size = buffer.size() - stream.avail_out;
@@ -528,7 +529,7 @@ std::vector<uint8_t> gzip_string(const std::string &data) {
             buffer.begin() + compressed_size);
     } while (stream.avail_out == 0);
 
-    deflateEnd(&stream);
+    zng_deflateEnd(&stream);
     return compressed;
 }
 
