@@ -52,9 +52,21 @@ jobs:
       - name: Install pkgconf via vcpkg
         run: |
           C:/vcpkg/vcpkg.exe add port pkgconf
-      - name: Build
+      - name: CMake configure
         run: |
           cmake --preset vcpkg -DCMAKE_BUILD_TYPE=Release -G "Ninja"
+      - name: Save /build directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-windows
+          path: build
+      - name: Save /vcpkg_installed directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: vcpkg-installed
+          path: vcpkg_installed
+      - name: Build
+        run: |
           cmake --build build
       - name: Save binary
         uses: actions/upload-artifact@v4
