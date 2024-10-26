@@ -60,6 +60,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: optift-windows
-          path:
-            - build/optift.exe
-            - build/*.dll
+          path: |
+            build/optift.exe
+            build/*.dll
