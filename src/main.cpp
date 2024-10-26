@@ -402,7 +402,8 @@ CostModel build_cost_model(hb_face_t *face, std::span<const UChar32> codepoints,
             const std::vector<uint8_t> compressed = subset_font(face, sample);
             {
                 std::lock_guard lock{results_mutex};
-                raw_data.emplace_back(sample.size(), compressed.size());
+                raw_data.emplace_back(sample.size(),
+                                      static_cast<double>(compressed.size()));
                 bar.tick();
             }
         });
