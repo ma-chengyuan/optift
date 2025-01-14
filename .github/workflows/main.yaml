@@ -63,3 +63,38 @@ jobs:
           path: |
             build/optift.exe
             build/*.dll
+  build-macos:
+    runs-on: macos-latest
+    env:
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          brew install ninja pkg-config
+          
+      - name: Install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          ./vcpkg/bootstrap-vcpkg.sh
+          
+      - name: Export GitHub Actions cache environment variables
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+            
+      - name: Build
+        run: |
+          cmake --preset vcpkg -DCMAKE_BUILD_TYPE=Release -G "Ninja"
+          cmake --build build
+          
+      - name: Save binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: optift-macos
+          path: build/optift
