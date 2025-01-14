@@ -1,12 +1,12 @@
 import * as path from "jsr:@std/path";
 import * as zipJs from "jsr:@zip-js/zip-js";
 
+import { JSDOM } from "npm:jsdom";
 import rehypeStringify from "npm:rehype-stringify";
+import remarkGfm from "npm:remark-gfm";
 import remarkParse from "npm:remark-parse";
 import remarkRehype from "npm:remark-rehype";
-import remarkGfm from "npm:remark-gfm";
 import { unified } from "npm:unified";
-import { JSDOM } from "npm:jsdom";
 
 type WeightedPost<T> = { weight: number } & T;
 type MarkdownPost = WeightedPost<{ markdown: string }>;
@@ -34,13 +34,14 @@ function htmlToOptift(post: HTMLPost) {
   function walkHTML(
     node: HTMLElement,
     curStyle: string,
-    codepoints: { [style: string]: Set<string> }
+    codepoints: { [style: string]: Set<string> },
   ) {
     if (node.nodeType === 3 /* Node.TEXT_NODE */) {
       const cjkRegex = /[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]/g;
       const text = node.textContent ?? "";
-      const set =
-        curStyle in codepoints ? codepoints[curStyle] : new Set<string>();
+      const set = curStyle in codepoints
+        ? codepoints[curStyle]
+        : new Set<string>();
       for (const match of text.match(cjkRegex) ?? []) set.add(match);
       if (set.size > 0) codepoints[curStyle] = set;
     }
@@ -56,10 +57,9 @@ function htmlToOptift(post: HTMLPost) {
           italic: "bold-italic",
         },
       };
-      const childStyle =
-        node.tagName in mapping
-          ? mapping[node.tagName][curStyle] ?? curStyle
-          : curStyle;
+      const childStyle = node.tagName in mapping
+        ? mapping[node.tagName][curStyle] ?? curStyle
+        : curStyle;
       for (const child of node.childNodes) {
         walkHTML(child as HTMLElement, childStyle, codepoints);
       }
@@ -79,7 +79,7 @@ function htmlToOptift(post: HTMLPost) {
 
 async function markdownPostsFromZipRepo(
   url: string,
-  prefix: string
+  prefix: string,
 ): Promise<{ [key: string]: OptiftPost }> {
   const response = await fetch(url);
   const blob = await response.blob();
@@ -98,10 +98,10 @@ async function markdownPostsFromZipRepo(
     promises.push(
       entry
         .getData(new zipJs.TextWriter())
-        .then((data) => markdownToHTML({ weight: 1.0, markdown: data }))
-        .then((htmlPost) => {
+        .then((data: string) => markdownToHTML({ weight: 1.0, markdown: data }))
+        .then((htmlPost: HTMLPost) => {
           ret[entry.filename] = htmlToOptift(htmlPost);
-        })
+        }),
     );
   }
   await Promise.all(promises);
@@ -113,16 +113,20 @@ function nextToMe(rel_path: string) {
   return path.join(import.meta.dirname ?? "", rel_path);
 }
 
-function attachFonts(posts: { [key: string]: OptiftPost }) {
+function attachFonts(
+  prefix: string,
+  format: string,
+  posts: { [key: string]: OptiftPost },
+) {
   const regular = {
-    path: nextToMe("SourceHanSansSC-Regular.otf"),
+    path: nextToMe(`${prefix}-Regular.${format}`),
     css: {
       "font-family": "NotoSans",
       "font-weight": "normal",
     },
   };
   const bold = {
-    path: nextToMe("SourceHanSansSC-Bold.otf"),
+    path: nextToMe(`${prefix}-Bold.${format}`),
     css: {
       "font-family": "NotoSans",
       "font-weight": "bold",
@@ -140,28 +144,54 @@ function attachFonts(posts: { [key: string]: OptiftPost }) {
   };
 }
 
-async function generateVuePosts() {
+export const fonts = [
+  ["NotoSansSC", "ttf", "noto_sans_sc"],
+  ["NotoSerifSC", "otf", "noto_serif_sc"],
+  ["OPPOSans", "otf", "opposans"],
+  ["SourceHanSansSC", "otf", "source_han_sans_sc"],
+];
+
+export async function generateVuePosts() {
   const vuePosts = await markdownPostsFromZipRepo(
     "https://github.com/vuejs-translations/docs-zh-cn/archive/refs/heads/main.zip",
-    "docs-zh-cn-main/src/"
+    "docs-zh-cn-main/src/",
   );
-  await Deno.writeTextFile(
-    nextToMe("fonts_vue.json"),
-    JSON.stringify(attachFonts(vuePosts), null, 2)
-  );
+  for (const [prefix, format, suffix] of fonts) {
+    await Deno.writeTextFile(
+      nextToMe(`fonts_vue_${suffix}.json`),
+      JSON.stringify(attachFonts(prefix, format, vuePosts), null, 2),
+    );
+  }
   console.log("Vue posts generated");
 }
 
-async function generateReactPosts() {
+export async function generateReactPosts() {
   const reactPosts = await markdownPostsFromZipRepo(
     "https://github.com/reactjs/zh-hans.react.dev/archive/refs/heads/main.zip",
-    "zh-hans.react.dev-main/src/content/"
+    "zh-hans.react.dev-main/src/content/",
   );
-  await Deno.writeTextFile(
-    nextToMe("fonts_react.json"),
-    JSON.stringify(attachFonts(reactPosts), null, 2)
-  );
+  for (const [prefix, format, suffix] of fonts) {
+    await Deno.writeTextFile(
+      nextToMe(`fonts_react_${suffix}.json`),
+      JSON.stringify(attachFonts(prefix, format, reactPosts), null, 2),
+    );
+  }
   console.log("React posts generated");
 }
 
-await Promise.all([generateReactPosts(), generateVuePosts()]);
+export async function deleteGeneratedFiles() {
+  for (const input of ["react", "vue"]) {
+    for (const [_1, _2, suffix] of fonts) {
+      try {
+        await Deno.remove(nextToMe(`fonts_${input}_${suffix}.json`));
+      } catch (e) {
+        if (!(e instanceof Deno.errors.NotFound)) throw e;
+      }
+    }
+  }
+}
+
+if (import.meta.main) {
+  await deleteGeneratedFiles();
+  await Promise.all([generateReactPosts(), generateVuePosts()]);
+}
