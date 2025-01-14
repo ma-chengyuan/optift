@@ -74,7 +74,7 @@ jobs:
       
       - name: Install dependencies
         run: |
-          brew install ninja pkg-config
+          brew install ninja pkg-config autoconf automake autoconf-archive
           
       - name: Install vcpkg
         run: |
