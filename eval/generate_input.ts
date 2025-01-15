@@ -1,3 +1,4 @@
+import * as fs from "jsr:@std/fs";
 import * as path from "jsr:@std/path";
 import * as zipJs from "jsr:@zip-js/zip-js";
 
@@ -119,19 +120,32 @@ function attachFonts(
   posts: { [key: string]: OptiftPost },
 ) {
   const regular = {
-    path: nextToMe(`${prefix}-Regular.${format}`),
+    path: "",
     css: {
-      "font-family": "NotoSans",
+      "font-family": prefix,
       "font-weight": "normal",
     },
   };
   const bold = {
-    path: nextToMe(`${prefix}-Bold.${format}`),
+    path: "",
     css: {
-      "font-family": "NotoSans",
+      "font-family": prefix,
       "font-weight": "bold",
     },
   };
+
+  if (
+    fs.existsSync(nextToMe(`${prefix}-Regular.${format}`)) &&
+    fs.existsSync(nextToMe(`${prefix}-Bold.${format}`))
+  ) {
+    regular.path = nextToMe(`${prefix}-Regular.${format}`);
+    bold.path = nextToMe(`${prefix}-Bold.${format}`);
+  } else if (fs.existsSync(nextToMe(`${prefix}.${format}`))) {
+    regular.path = nextToMe(`${prefix}.${format}`);
+    bold.path = nextToMe(`${prefix}.${format}`);
+  } else {
+    throw new Error(`Font ${prefix} not found`);
+  }
 
   return {
     fonts: {
@@ -147,8 +161,9 @@ function attachFonts(
 export const fonts = [
   ["NotoSansSC", "ttf", "noto_sans_sc"],
   ["NotoSerifSC", "otf", "noto_serif_sc"],
-  ["OPPOSans", "otf", "opposans"],
   ["SourceHanSansSC", "otf", "source_han_sans_sc"],
+  ["SmileySans-Oblique", "ttf", "smiley_sans"],
+  ["LXGWWenKai-Regular", "ttf", "lxgw_wenkai"],
 ];
 
 export async function generateVuePosts() {
