@@ -1,143 +1,190 @@
 # OptIFT: Optimizer for Incremental Font Transfer
 
-**TL;DR:** Clever font subsetting and partitioning for static sites to minimize CJK web font loading times. >50% less bytes loaded compared with Google Fonts.
+**TL;DR:** OptIFT minimizes CJK web font loading times by using clever font subsetting and partitioning based on page-wise character usage patterns. It reduces the total bytes loaded by over **50%** compared to Google Fonts.
 
-OptIFT on [Vue docs](https://github.com/vuejs-translations/docs-zh-cn):
+OptIFT applied to [Vue docs](https://github.com/vuejs-translations/docs-zh-cn):
+![Vue](https://quickchart.io/chart?height=400&c=%7Btype%3A%22bar%22%2Coptions%3A%7Bplugins%3A%7Btitle%3A%7Bdisplay%3Atrue%2Ctext%3A%22Font%20size%20reduction%22%7D%7D%2Cscales%3A%7BxAxes%3A%5B%7Bticks%3A%7BautoSkip%3Afalse%2CmaxRotation%3A0%2CminRotation%3A0%7D%2CscaleLabel%3A%7Bdisplay%3Atrue%2ClabelString%3A%22Font%20family%22%7D%7D%5D%2CyAxes%3A%5B%7Bticks%3A%7BbeginAtZero%3Atrue%7D%2CscaleLabel%3A%7Bdisplay%3Atrue%2ClabelString%3A%22Avg%20bytes%20loaded%20on%20uncached%20page%20visit%20(MB)%22%7D%7D%5D%7D%7D%2Cdata%3A%7Blabels%3A%5B%22Noto%20Sans%22%2C%22Noto%20Serif%22%2C%22Source%20Han%20Sans%22%2C%22Smiley%20Sans%22%2C%22Lxgw%20Wen%20Kai%22%5D%2Cdatasets%3A%5B%7Blabel%3A%22Google%20Fonts%22%2Cdata%3A%5B0.511396484375%2C0.9285058593750001%2C1.09298828125%2C0.338955078125%2C0.575517578125%5D%2CbackgroundColor%3A%22rgb(66%2C%20133%2C%20244)%22%7D%2C%7Blabel%3A%22OptIFT%20no%20partitioning%22%2Cdata%3A%5B0.23216796875%2C0.421240234375%2C0.512099609375%2C0.160087890625%2C0.273466796875%5D%2CbackgroundColor%3A%22rgb(244%2C%20180%2C%200)%22%7D%2C%7Blabel%3A%22OptIFT%2010%20partitions%22%2Cdata%3A%5B0.19374023437500001%2C0.343359375%2C0.423359375%2C0.12078125%2C0.205361328125%5D%2CbackgroundColor%3A%22rgb(52%2C%20211%2C%20153)%22%7D%2C%7Blabel%3A%22OptIFT%2015%20partitions%22%2Cdata%3A%5B0.18913085937500002%2C0.33294921875%2C0.409453125%2C0.12078125%2C0.205361328125%5D%2CbackgroundColor%3A%22rgb(16%2C%20185%2C%20129)%22%7D%2C%7Blabel%3A%22OptIFT%2020%20partitions%22%2Cdata%3A%5B0.1869140625%2C0.3301953125%2C0.4048046875%2C0.12078125%2C0.205361328125%5D%2CbackgroundColor%3A%22rgb(5%2C%20150%2C%20105)%22%7D%2C%7Blabel%3A%22OptIFT%2025%20partitions%22%2Cdata%3A%5B0.186396484375%2C0.32894531250000003%2C0.405283203125%2C0.12078125%2C0.205361328125%5D%2CbackgroundColor%3A%22rgb(4%2C%20136%2C%2087)%22%7D%5D%7D%7D)
 
-![Vue](https://quickchart.io/chart?height=400&c={type:"bar",options:{plugins:{title:{display:true,text:"Font size reduction"}},scales:{xAxes:[{ticks:{autoSkip:false,maxRotation:0,minRotation:0},scaleLabel:{display:true,labelString:"Font family"}}],yAxes:[{ticks:{beginAtZero:true},scaleLabel:{display:true,labelString:"Avg bytes loaded on uncached page visit (MB)"}}]}},data:{labels:["NotoSansSC","NotoSerifSC","OPPOSans","SourceHanSansSC"],datasets:[{label:"Google Fonts",data:[0.511396484375,0.92849609375,0.568837890625,1.092978515625],backgroundColor:"rgb(66, 133, 244)"},{label:"OptIFT no partitioning",data:[0.23216796875,0.421240234375,0.27622070312499997,0.512099609375],backgroundColor:"rgb(244, 180, 0)"},{label:"OptIFT 10 partitions",data:[0.19374023437500001,0.343359375,0.180400390625,0.42337890624999996],backgroundColor:"rgb(52, 211, 153)"},{label:"OptIFT 15 partitions",data:[0.18913085937500002,0.33294921875,0.16615234375,0.40947265625],backgroundColor:"rgb(16, 185, 129)"},{label:"OptIFT 20 partitions",data:[0.1869140625,0.3301953125,0.16450195312500002,0.40481445312500003],backgroundColor:"rgb(5, 150, 105)"},{label:"OptIFT 25 partitions",data:[0.186396484375,0.32894531250000003,0.15898437499999998,0.40529296875000004],backgroundColor:"rgb(4, 136, 87)"}]}})
+OptIFT applied to [React docs](https://github.com/reactjs/zh-hans.react.dev):
+![React](https://quickchart.io/chart?height=400&c=%7Btype%3A%22bar%22%2Coptions%3A%7Bplugins%3A%7Btitle%3A%7Bdisplay%3Atrue%2Ctext%3A%22Font%20size%20reduction%22%7D%7D%2Cscales%3A%7BxAxes%3A%5B%7Bticks%3A%7BautoSkip%3Afalse%2CmaxRotation%3A0%2CminRotation%3A0%7D%2CscaleLabel%3A%7Bdisplay%3Atrue%2ClabelString%3A%22Font%20family%22%7D%7D%5D%2CyAxes%3A%5B%7Bticks%3A%7BbeginAtZero%3Atrue%7D%2CscaleLabel%3A%7Bdisplay%3Atrue%2ClabelString%3A%22Avg%20bytes%20loaded%20on%20uncached%20page%20visit%20(MB)%22%7D%7D%5D%7D%7D%2Cdata%3A%7Blabels%3A%5B%22Noto%20Sans%22%2C%22Noto%20Serif%22%2C%22Source%20Han%20Sans%22%2C%22Smiley%20Sans%22%2C%22Lxgw%20Wen%20Kai%22%5D%2Cdatasets%3A%5B%7Blabel%3A%22Google%20Fonts%22%2Cdata%3A%5B0.6105859375%2C1.118359375%2C1.322216796875%2C0.3580078125%2C0.61107421875%5D%2CbackgroundColor%3A%22rgb(66%2C%20133%2C%20244)%22%7D%2C%7Blabel%3A%22OptIFT%20no%20partitioning%22%2Cdata%3A%5B0.3226953125%2C0.58626953125%2C0.72220703125%2C0.207109375%2C0.355166015625%5D%2CbackgroundColor%3A%22rgb(244%2C%20180%2C%200)%22%7D%2C%7Blabel%3A%22OptIFT%2010%20partitions%22%2Cdata%3A%5B0.298837890625%2C0.51771484375%2C0.632666015625%2C0.20634765625%2C0.351396484375%5D%2CbackgroundColor%3A%22rgb(52%2C%20211%2C%20153)%22%7D%2C%7Blabel%3A%22OptIFT%2015%20partitions%22%2Cdata%3A%5B0.281201171875%2C0.508017578125%2C0.61544921875%2C0.20634765625%2C0.351396484375%5D%2CbackgroundColor%3A%22rgb(16%2C%20185%2C%20129)%22%7D%2C%7Blabel%3A%22OptIFT%2020%20partitions%22%2Cdata%3A%5B0.27759765625%2C0.5062695312500001%2C0.6034765625%2C0.20634765625%2C0.351396484375%5D%2CbackgroundColor%3A%22rgb(5%2C%20150%2C%20105)%22%7D%2C%7Blabel%3A%22OptIFT%2025%20partitions%22%2Cdata%3A%5B0.27666015625%2C0.5016796875%2C0.60017578125%2C0.20634765625%2C0.351396484375%5D%2CbackgroundColor%3A%22rgb(4%2C%20136%2C%2087)%22%7D%5D%7D%7D)
 
-OptIFT on [React docs](https://github.com/reactjs/zh-hans.react.dev):
+## Table of contents
 
-![React](https://quickchart.io/chart?height=400&c={type:"bar",options:{plugins:{title:{display:true,text:"Font size reduction"}},scales:{xAxes:[{ticks:{autoSkip:false,maxRotation:0,minRotation:0},scaleLabel:{display:true,labelString:"Font family"}}],yAxes:[{ticks:{beginAtZero:true},scaleLabel:{display:true,labelString:"Avg bytes loaded on uncached page visit (MB)"}}]}},data:{labels:["NotoSansSC","NotoSerifSC","OPPOSans","SourceHanSansSC"],datasets:[{label:"Google Fonts",data:[0.6105859375,1.11833984375,0.6790625,1.322216796875],backgroundColor:"rgb(66, 133, 244)"},{label:"OptIFT no partitioning",data:[0.3226953125,0.58626953125,0.387978515625,0.722216796875],backgroundColor:"rgb(244, 180, 0)"},{label:"OptIFT 10 partitions",data:[0.298837890625,0.51771484375,0.2476953125,0.632666015625],backgroundColor:"rgb(52, 211, 153)"},{label:"OptIFT 15 partitions",data:[0.281201171875,0.508017578125,0.234326171875,0.61544921875],backgroundColor:"rgb(16, 185, 129)"},{label:"OptIFT 20 partitions",data:[0.27759765625,0.5062695312500001,0.2263671875,0.603486328125],backgroundColor:"rgb(5, 150, 105)"},{label:"OptIFT 25 partitions",data:[0.27666015625,0.5016796875,0.21443359375,0.60017578125],backgroundColor:"rgb(4, 136, 87)"}]}})
+1. [Introduction](#introduction)
+2. [Quick start](#quick-start)
+3. Detailed usage
+   - [Input JSON specification](#input-json-specification)
+   - [Output files](#output-files)
+4. [Partitions explained](#partitions-explained)
+5. [Comparison with other solutions](#comparison-with-other-solutions)
+6. [Building from source](#building-from-source)
+7. [Legal considerations](#legal-considerations)
+8. [Contributing](#contributing)
+9. [Acknowledgements](#acknowledgements)
 
-## What OptIFT solves
+## Introduction
 
-Web fonts are cool! But not when they are slow. Alphabetical languages like English have their entire alphabets covered by a few dozen glyphs and a full web font can usually be kept under 100 KB, which loads in an instant given today’s internet speed. The story is entirely different for ideographic languages such as Chinese. There are 3500–4000 Hanzis (Chinese characters) in daily use, and tens of thousands more uncommon ones, each requiring its own glyph. Consequently, decently complete Chinese fonts are around tens of megabytes each. The huge size raises significant barriers of serving them over the web. 
+Web fonts are essential for creating a visually appealing web experience. However, for ideographic languages like Chinese, web fonts are significantly larger than those used for alphabetical languages, which can lead to long loading times.
 
-Hope is not all lost, however. While the absolute number of Hanzis is daunting, much less is used in any given piece of writing. Hence web fonts can be made practical if we subset the font to just what we use. OptIFT caters to exactly this use case and deals with many of the intricacies of this idea. In particular, you specify:
+While common alphabetical fonts like Latin cover their entire alphabet in a few dozen glyphs, CJK fonts require thousands of glyphs. A complete Chinese font can easily reach tens of megabytes in size, creating a major bottleneck for web performance.
 
-1. What fonts you want to use (path to OTF or TTF);
-2. What page contains which characters, and in which font;
-3. How many partitions you want to use (more on that later); 
-4. Optionally, weights of your pages (as you may get from traffic analytics).
+OptIFT addresses this problem by:
 
-OptIFT gives you
+- Subsetting fonts based on actual character usage in your content.
+- Partitioning the subsetted fonts to balance performance for single-page and multi-page visits.
+- Generating optimized WOFF2 font files and corresponding CSS for your static site.
 
-1. A set of partitioned subsetted WOFF2 web fonts.
-2. A CSS styleheet that you can embed into your site to use these fonts. 
+If you have a static site with CJK content and want to improve font loading performance, OptIFT is designed for you.
 
-**In general, you may consider OptIFT if**
+## Quick start
 
-1. You want to use web fonts for the CJK contents on your site;
-2. The CJK contents are relatively static (such as blog posts or technical documentations).
+Here’s how to get started with OptIFT in a few steps:
 
-## Usage
+### 1. Install dependencies
 
+Make sure you have CMake, a C++ compiler, and Vcpkg installed. Then clone the OptIFT repository:
+
+```bash
+$ git clone https://github.com/ma-chengyuan/optift.git
+$ cd optift
 ```
-Usage: optift [--help] [--version] --input VAR --output VAR --n-partitions VAR [--rng VAR] [--samples VAR] [--compare-baseline] [--compare-google]
 
-Optional arguments:
-  -h, --help          shows help message and exits 
-  -v, --version       prints version information and exits 
-  -i, --input         path to the input JSON file [required]
-  -o, --output        path to the output directory [required]
-  -n, --n-partitions  number of partitions to create [required]
-  --rng               RNG seed for sampling cost model [nargs=0..1] [default: 42]
-  --samples           number of samples for cost model [nargs=0..1] [default: 100]
-  --compare-baseline  compare heuristic solution to baseline solution 
-  --compare-google    compare heuristic solution to Google Fonts solution 
+### 2. Build OptIFT
 
+Make sure you have configured the `VCPKG_ROOT` environment variable.
+
+```bash
+$ mkdir build && cd build
+$ cmake .. --preset vcpkg
+$ cmake --build .
 ```
 
-### JSON input
+### 3. Download prebuilt binaries
 
-To use OptIFT, you need an input JSON file that specifies the font to subset and the characters used by your website. It looks something like this:
+You can also download prebuilt binaries from the Github Action artifacts in the [repository](https://github.com/ma-chengyuan/optift/actions). The Linux binaries are fully statically linked, so they should work out of the box on most distributions.
+
+### 4. Run OptIFT
+
+Prepare a simple input JSON file (see [Input JSON Specification](#input-json-specification) for details) and run the following command:
+
+```bash
+$ ./optift -i input.json -o output/ -n 10
+```
+
+This command will generate partitioned WOFF2 font files and a CSS file in the specified output directory.
+
+## Detailed usage
+
+### Input JSON specification
+
+OptIFT requires an input JSON file specifying the fonts and characters used on your website. Here’s a minimal example:
 
 ```json
 {
   "fonts": {
     "regular": {
-      "path": "/home/chengyuan/Projects/font-splitter-cpp/eval/SourceHanSansSC-Regular.otf",
+      "path": "path/to/SourceHanSansSC-Regular.otf",
       "css": {
-        "font-family": "NotoSans",
+        "font-family": "SourceHanSans",
         "font-weight": "normal"
-      }
-    },
-    "bold": {
-      "path": "/home/chengyuan/Projects/font-splitter-cpp/eval/SourceHanSansSC-Bold.otf",
-      "css": {
-        "font-family": "NotoSans",
-        "font-weight": "bold"
       }
     }
   },
   "posts": {
-    "zh-hans.react.dev-main/src/content/blog/2024/05/22/react-conf-2024-recap.md": {
+    "post-1": {
       "weight": 1,
       "codepoints": {
-        "regular": "回顾上周我们在内华达州亨德森举办了为期两天的大会，有多名与者亲临现场讨论工程领域最新进展。这篇文章中将总结次活动演讲和公告年月日是自以来首线下议很高兴能够再社区团一起宣布、架构版及实验本同时登台通用服务器组件等完整第二直播已经可观看由席技术官发表欢迎致辞随后织负责人主持行题分享对目标愿景：帮助任何更加轻松建卓越户体带状报载量超过亿并且开学习编她强调成就今容请查原生节奏鲁斯支介绍接即推出功该准备好于产环境测试你全部也关深入析哪些解读路图协使增单计算机设应理源个供家尝其作信息档如忘吧感谢氛围包括万他还页面；市品详情每访问微软始菜几乎移桌所做库框平不仅空间继续阶段改未跨方创都样启此门指南末尾答队束性错误揭秘代打破规则决员参太长列但想特别倡导策划担提聚讯细反馈幻灯片填补缺网站赞商得音视频觉舞声威汀酒店住宿知识位它到共真鼓心见！",
-        "bold": "点击这里观看第一天完整直播。二"
+        "regular": "你好世界"
       }
-    },
+    }
   }
 }
 ```
 
-The root object has two fields:
+#### Explanation
 
-* `fonts`: an object holding font information. The keys will be the fonts used in your website. The value of each key is an object consisting of the keys below:
+- fonts: Defines the fonts you want to subset. Each font entry contains:
+  - `path`: Path to the OTF or TTF font file.
+  - `css`: `@font-face` CSS properties to be added in the output CSS.
+- posts: Lists pages or posts on your site and their character usage.
+  - `weight`: A relative importance weight for the page.
+  - `codepoints`: Characters used in the page, grouped by font style.
 
-  * `path`: path to the font file. For now only OTF and TTF are supported.
-  * `css`: CSS [key-value pairs](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face) to be added to the `@font-face` definitions of the subsetted f'ont in the output CSS. (except `unicode-range`, which will be overwritten by what OptIFT generates anyways) 
+You can define multiple fonts and posts as needed. For a more complex example, see the full input JSON example.
 
-  The exact names of the keys does not matter as long as they are consistent with what’s used in the `posts` section below. Even you are using just one typeface, it’s a good idea to create multiple font objects corresponding to its different styles (bold, italic, small caps) and where it’s used (title, heading, body), because (1) different styles may point to different font files and (2) life will be easier if you decide to use multiple fonts later. OptIFT internally merges fonts with the same font file and CSS key-values. 
+### Output files
 
-* `posts`: an object holding which characters are used by which font in which page / post (called `posts` because it was originally designed for static blogs). The keys can be arbitrary and serve no real purpose except for visual inspection. The values are objects with two fields.
+After running OptIFT, you will get:
 
-  * `weight`: the weight of the page. Roughly speaking, OptIFT optimizes to minimize the weighted average of “page loading cost.” So a page with higher weight (such as index) will be prioritized by OptIFT.
-  * `codepoints`: an object keyed by the fonts you defined in the `fonts` section. Values are strings containing the characters styled in that font in the page. Order does not matter; duplications are ignored. As the name hints, OptIFT assumes that *the rendering of every Unicode code point can be done deterministically in isolation* — not true in general, but this assumption holds up nicely in CJK  languages. 
+1. **Subsetted WOFF2 fonts**: Optimized web fonts partitioned into smaller chunks.
+2. **CSS file**: A stylesheet linking the generated fonts and defining their usage.
 
-Generation of the JSON file is beyond the scope of this project. It is recommended that you extend your favorite CMS or site generator to programmatically generate this JSON and keep it in sync with your website. `eval/generate_input.ts` shows a simple example of how this can be done. 
+## Partitions explained
 
-### Output
+OptIFT balances two extremes when subsetting fonts:
 
-OptIFT requires that you specify an output directory to hold the subsetted fonts and the generated CSS. This can be anywhere but it’s recommended that you put it under the output folder of whatever site generator you are using, since OptIFT should be run whenever the site is built or updated.
+1. **One subset per page**: Minimal bytes loaded for single-page visits, but high total bytes if users visit multiple pages.
+2. **One subset for the entire site**: Reusable across pages but results in large initial loads.
 
-### Partitions
+By creating **partitions**, OptIFT finds a middle ground:
 
-OptIFT slices the subsetted font in partitions to balance the bytes loaded in an isolated visit and the bytes loaded across visits to multiple pages on a given site. Consider the following extreme cases:
+- Common characters are grouped into shared partitions.
+- Rare characters are placed in smaller, page-specific partitions.
 
-* A unique subsetted font for every web page makes isolated visits as fast as they can be, but if a user visits many pages, many such fonts would need to be loaded.
-* A subsetted font for the entire site makes the font reusable across different pages, but someone who visits a single page risks loading more than it needs. This is especially true if the page most frequent visited is light in content (such as index).
-
-A middle ground solution is to subset the font for the entire site, and further partition it such that each page only loads a subset of all partitions. One could imagine having a few partitions that cover the most common characters used by every post and few that are there only for a few post using some super rare characters. Empirically, having 10–30 partitions seems to be a sweet spot. 
+Empirical testing shows that **10-30 partitions** typically provide the best trade-off.
 
 ## Comparison with other solutions
 
+| Feature                       | OptIFT   | Google Fonts | CNFS | Incremental Font Transfer (IFT) |
+| ----------------------------- | -------- | ------------ | ---- | ------------------------------- |
+| Custom page-wise partitioning | Yes      | No           | No   | No                              |
+| Ease of use                   | Medium   | High         | High | High                            |
+| Dynamic site support          | No       | Yes          | Yes  | Yes                             |
+| OpenType feature support      | Untested | Full         | Full | Full                            |
+| Standardized browser support  | No       | No           | No   | Proposed                        |
+
 ### Google Fonts
 
-Google has been using machine learning techniques to optimize slicing of CJK fonts since 2017 — basically doing what this project intends to do on the scale of the entire internet! Therefore, serving CJK fonts from Google Fonts is a quick, no-brainer solution that’s already much much better than serving the full font file and gets you 70% of what’s theoretically achievable. If you can get away with Google Fonts, great!
+Google Fonts offers a good out-of-the-box solution for CJK web fonts. It uses machine learning to subset and slice fonts efficiently, providing a substantial performance improvement over default solutions. OptIFT, however, often achieves an additional **50% reduction** in bytes loaded by tailoring the fonts specifically to your site’s content.
 
-OptIFT is for those who are not content with being “70% there” or experimenting fonts that are not available on Google Fonts. OptIFT provides a flag (`--compare-google`) that produces a comparison of estimated cost (total bytes loaded) of its output versus Google Fonts’, and empirically OptIFT often wins by ~50%! (for regular style; ~70% is common for bold or italic fonts which are used more sparsely)
+### cn-font-split (CNFS)
 
-### [cn-font-split](https://github.com/KonghaYao/cn-font-split/tree/release/packages/ffi-js)
+cn-font-split (CNFS) is a mature tool for font partitioning. Unlike OptIFT, which relies on page-wise character usage, CNFS partitions fonts based on the font file alone, making it suitable for both static and dynamic sites. You can find more information about CNFS on its [GitHub repository](https://github.com/KonghaYao/cn-font-split).
 
-cn-font-split (“CNFS” below) is a more popular, mature tool in this domain. OptIFT and CNFS are largely **orthogonal and/or complementary.** By default, CNFS partitions fonts solely based on the font file itself (and not how it’s used in your website), using configurable partition schemes (such as one based on Google Font’s). Hence, CNFS works for dynamic sites and static sites alike. In contrast, I built OptIFT to demonstrate that incorporating page-wise character usage admits better partitioning. OptIFT is deliberately more specialized and more algorithmic in nature. 
+While CNFS is easier to use and supports more OpenType features, OptIFT can achieve better results for static sites by leveraging more specific information.
 
-Things OptIFT and CNFS have in common:
+### Incremental Font Transfer (IFT)
 
-* Both are based on Harfbuzz, which does the heavy lifting of parsing and subsetting OpenType font files.
-* Both are parallelized: CNFS uses Rust + Rayon, whereas OptIFT uses TBB.
+Incremental Font Transfer (IFT) is a proposed [W3C standard](https://www.w3.org/TR/IFT/) designed to allow browsers to incrementally download only the portions of a font that are needed for rendering specific content. This approach would significantly improve font loading performance, particularly for large CJK fonts.
 
-You may prefer CNFS for 
+However, IFT is still in the proposal stage and has not yet been implemented in browsers. While it holds promise as the ideal future solution for web font optimization, it remains speculative until officially adopted and supported.
 
-* better support for OpenType features — OptIFT has no special code other than those in Harfbuzz to handle OT features nor is it tested on these cases. 
-* better ease-of-use — CNFS is distributed via NPM, and has Vite plugins available. OptIFT requires more DIY in this regard.
+For now, OptIFT offers a practical and efficient alternative for static sites.
 
-Prefer OptIFT if
+## Building from source
 
-* you embrace perfectionism and enjoy seeing things pushed to the extreme: using as much information as possible to make every byte over the wire count — does that sound interesting to you?
-* you are willing to take the time to integrate it into your publishing work flow.
-* you enjoy taking the road not taken.
+OptIFT is written in modern C++ and uses CMake + Vcpkg for dependency management. Follow the steps in [Quick Start](#quick-start) to build it on your platform.
 
-Combining OptIFT and CNFS is possible in theory: CNFS provides interface to provide custom partitioning strategies, which could call OptIFT. How that is done is currently out of the scope of this project (PRs are welcome!).
+### Why C++?
+
+OptIFT is built in C++ primarily because Harfbuzz, the font subsetting library, has a mature C API that integrates more naturally with C++ than with Rust. While Rust is an attractive option, working directly with Harfbuzz in Rust involves additional overhead due to the need for FFI bindings. Once Google Fonts completes a Rust rewrite of a subsetter with features comparable to `hb-subset`, a full Rust rewrite of OptIFT may be considered.
+
+## Legal considerations
+
+OptIFT should only be used with fonts that permit subsetting or partitioning in their licenses. Common licenses that allow this include:
+
+- [SIL Open Font License](https://scripts.sil.org/OFL)
+
+Always check the font’s license before using OptIFT to avoid potential legal issues.
+
+## Contributing
+
+Contributions are welcome! Feel free to open issues or submit pull requests.
+
+## Acknowledgements
+
+I would like to thank **Mingyang Deng** ([website](https://lambertae.github.io/)) for proposing a heuristic approach to font partitioning, which served as the foundation for OptIFT's partitioning strategy.
+
+## License
+
+OptIFT is licensed under the MIT License. See LICENSE for more details.
