@@ -3,6 +3,8 @@
 ![Builder](https://github.com/ma-chengyuan/optift/actions/workflows/main.yaml/badge.svg)
 ![MIT License](https://img.shields.io/badge/license-MIT-blue)
 
+The English README is [here](README.md).
+
 OptIFT 通过基于页面汉字具体使用情况使用启发式算法进行字体子集化和拆分，显著减少静态 CJK 网页字体加载大小，与 Google Fonts 相比，加载量减少超过 50%。
 
 OptIFT 在 [Vue 中文文档](https://github.com/vuejs-translations/docs-zh-cn) 上的效果对比:

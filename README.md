@@ -3,6 +3,8 @@
 ![Builder](https://github.com/ma-chengyuan/optift/actions/workflows/main.yaml/badge.svg)
 ![MIT License](https://img.shields.io/badge/license-MIT-blue)
 
+中文版请见 [README.zh_CN.md](README.zh_CN.md).
+
 **TL;DR:** OptIFT minimizes CJK web font loading times by using clever font subsetting and partitioning based on page-wise character usage patterns. It reduces the total bytes loaded by over **50%** compared to Google Fonts.
 
 OptIFT applied to [Vue docs](https://github.com/vuejs-translations/docs-zh-cn):
