@@ -137,7 +137,7 @@ Empirical testing shows that **10-30 partitions** typically provide the best tra
 
 | Feature                       | OptIFT   | Google Fonts | CNFS | Incremental Font Transfer (IFT) |
 | ----------------------------- | -------- | ------------ | ---- | ------------------------------- |
-| Custom page-wise partitioning | Yes      | No           | No   | No                              |
+| Based on page-wise glyph usage| Yes      | No           | No   | Yes                             |
 | Ease of use                   | Medium   | High         | High | High                            |
 | Dynamic site support          | No       | Yes          | Yes  | Yes                             |
 | OpenType feature support      | Untested | Full         | Full | Full                            |
