@@ -1,5 +1,8 @@
 # OptIFT: 增量式网字加载优化
 
+![Builder](https://github.com/ma-chengyuan/optift/actions/workflows/main.yaml/badge.svg)
+![MIT License](https://img.shields.io/badge/license-MIT-blue)
+
 OptIFT 通过基于页面汉字具体使用情况使用启发式算法进行字体子集化和拆分，显著减少静态 CJK 网页字体加载大小，与 Google Fonts 相比，加载量减少超过 50%。
 
 OptIFT 在 [Vue 中文文档](https://github.com/vuejs-translations/docs-zh-cn) 上的效果对比:
@@ -142,7 +145,7 @@ OptIFT 在字体子集化时平衡了两个极端情况：
 | 基于页面字符使用情况      | 是      | 否            | 否    | 是            |
 | 易用性           | 中      | 高            | 高    | 高            |
 | 动态网站支持        | 否      | 是            | 是    | 是            |
-| OpenType 功能支持 | 未测试    | 全部           | 全部   | 全部           |
+| OpenType 特性支持 | 未测试    | 全部           | 全部   | 全部           |
 | 标准化浏览器支持      | 否      | 否            | 否    | 提议           |
 
 ### Google Fonts
@@ -151,9 +154,9 @@ Google Fonts 为 CJK 网页字体提供了一个开箱即用的优秀解决方�
 
 ### cn-font-split (CNFS)
 
-cn-font-split (CNFS) 是一个成熟的字体分区工具。与 OptIFT 不同，CNFS 基于字体文件本身进行分区，使其适用于静态和动态站点。更多信息可在其 [GitHub 仓库](https://github.com/KonghaYao/cn-font-split) 中找到。
+cn-font-split (CNFS) 是中文网字计划推出的一个成熟的字体分包工具。与 OptIFT 不同，CNFS 基于字体文件本身进行拆分，故而对动态和静态网页都可用。更多信息请参见 [GitHub 仓库](https://github.com/KonghaYao/cn-font-split) 。
 
-虽然 CNFS 更易于使用并支持更多的 OpenType 功能，但 OptIFT 通过利用更具体的信息，可以为静态站点带来更好的效果。
+虽然 CNFS 更易于使用并支持更多的 OpenType 特性，但 OptIFT 通过利用每个页面具体的字形使用情况，可以为静态站点带来更好的效果。
 
 ### 增量字体传输 (IFT)
 
